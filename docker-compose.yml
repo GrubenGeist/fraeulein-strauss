@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  faeuleinstrauss:
+    build: .
+    container_name: faeuleinstrauss
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: always
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./config/apache.conf:/etc/apache2/sites-enabled/000-default.conf # Changed path here
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: faeuleinstrauss_DB
+      WORDPRESS_DB_USER: ds-it-strauss
+      WORDPRESS_DB_PASSWORD: TL2qSAS%yb&peaKgk=`5U
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG', true);
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_GROUP: www-data
+      APACHE_SERVER_NAME: localhost
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb_faeuleinstrauss
+    restart: always
+    volumes:
+      - fraeuleinstrauss_mariadb:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: yv#~hyNFPoMVH^5q&h=*D
+      MYSQL_DATABASE: faeuleinstrauss_DB
+      MYSQL_USER: ds-it-strauss
+      MYSQL_PASSWORD: TL2qSAS%yb&peaKgk=`5U
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "mariadb -uds-it-strauss -p'TL2qSAS%yb&peaKgk=`5U' -e 'SELECT 1;' faeuleinstrauss_DB"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer_faeuleinstrauss
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mariadb
+
+volumes:
+  fraeuleinstrauss_wp-content:
+  fraeuleinstrauss_mariadb:
